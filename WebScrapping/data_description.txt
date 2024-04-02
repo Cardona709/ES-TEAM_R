@@ -1,0 +1,10 @@
+The `carbon.csv` file contains data related to carbon emissions. It is a comma-separated values (CSV) file, which means that each line represents a separate record, and the values within each line are separated by commas.
+
+The file include columns as:
+- Date: The Date in which the carbon emissions data was recorded.
+- Time: The Time in which the carbon emissions data was recorded.
+- Emissions: The amount of carbon emissions in metric tons for the given year and country.
+
+The `carbon.csv` file can be used for various purposes, such as analyzing trends in carbon emissions over time or comparing emissions between different countries.
+
+Please note that the specific columns and data structure may vary depending on the source of the file. It is recommended to inspect the file's contents to understand its structure and column names before processing or analyzing the data.
