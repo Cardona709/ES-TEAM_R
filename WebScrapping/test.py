@@ -42,3 +42,5 @@ date=time.strftime("%d/%m/%Y")
 hour=time.strftime("%H")
 #print the carbon value and time of the request
 print("Carbon emmission", carbon, "gCO2eq/kWh at day", date, "and time", hour)
+
+print("Writing to csv file")
