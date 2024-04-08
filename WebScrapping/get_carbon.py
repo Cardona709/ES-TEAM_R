@@ -33,7 +33,12 @@ def GetCarbon(url_get_carbon):
 
 #url of the page we want to scrape 
 url = "https://app.electricitymaps.com/zone/PT"
+
 carbon=GetCarbon(url)
+while(carbon=="?"):
+    print("Error in the request, trying again")
+    carbon=GetCarbon(url)
+    
 date=time.strftime("%d/%m/%Y")
 hour=time.strftime("%H")
 #print the carbon value and time of the request
