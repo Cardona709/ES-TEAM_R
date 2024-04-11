@@ -1,0 +1,43 @@
+services:
+  app:
+    build: .
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: postgrespw # Replace with a strong password
+      POSTGRES_USER: postgres
+      POSTGRES_DB: carbono_feup
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: always
+
+  # pgAdmin for Database Management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    ports:
+      - 5050:80 # Map container port 5050 to host port 80 (default pgAdmin port)
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com # Set an email address
+      PGADMIN_DEFAULT_PASSWORD: password # Set a strong password
+    restart: always
+
+  # Grafana for Monitoring (configuration is needed)
+  #grafana:
+  #  image: grafana/grafana-oss:latest
+  #  ports:
+  #    - "3000:3000" # Map container port 3000 to host port 3000
+  #  volumes:
+  #    - grafana_data:/var/lib/grafana # Persistant storage for Grafana data
+  #  restart: always
+
+volumes:
+  postgres-data: {}
+  grafana_data: {}
