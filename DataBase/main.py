@@ -2,60 +2,12 @@ import random
 import string
 import time
 from os.path import dirname, join, realpath
-from typing import List, Self, Tuple
+from typing import List
 
 import polars as pl
 import psycopg as pg
 
-#### Data classes to model the data ####
-
-
-class CarbonData:
-    utc_timestamp: str
-    grams_per_kw: float
-
-    def load_from_row(self, row: Tuple[str, float]) -> Self:
-        self.utc_timestamp = parse_datetime(row[0])
-        self.grams_per_kw = row[1]
-        return self
-
-    def __repr__(self):
-        return f"UTC Timestamp: {self.utc_timestamp}, Grams per KW: {self.grams_per_kw}"
-
-
-class EnergyUsage:
-    utc_timestamp: str
-    location: str
-    energy_usage: float
-
-    def init(self, location: str, timestamp: str, energy_usage: float) -> Self:
-        self.location = location
-        self.utc_timestamp = parse_datetime(timestamp)
-        self.energy_usage = energy_usage
-        return self
-
-    def __repr__(self):
-        return f"UTC Timestamp: {self.utc_timestamp}, Location: {self.location}, Energy Usage (KW): {self.energy_usage}"
-
-
-def parse_datetime(datetime: str) -> str:
-    date, time = datetime.split(" ")
-    day, month, year = date.split("/")
-    return f"{year}-{month}-{day} {time}"
-
-
-def process_data(
-    carbon_df: pl.DataFrame, energy_df: pl.DataFrame
-) -> Tuple[List[CarbonData], List[EnergyUsage], List[str]]:
-    locations = energy_df.columns[2:]
-    carbon_data = [CarbonData().load_from_row(row) for row in carbon_df.rows()]
-    energy_data = [
-        EnergyUsage().init(location, row[0], row[idx + 2])
-        for row in energy_df.rows()
-        for idx, location in enumerate(locations)
-    ]
-    return carbon_data, energy_data, locations
-
+import data_classes as dc
 
 #### Database initialization ####
 
@@ -126,8 +78,8 @@ def test_init_query(query: bytes):
 
 def init_db(
     schema: str,
-    carbon_data: List[CarbonData],
-    energy_data: List[EnergyUsage],
+    carbon_data: List[dc.CarbonData],
+    energy_data: List[dc.EnergyUsage],
     locations: List[str],
 ):
     with open(DB_INIT_FILE_PATH, "r") as f:
@@ -147,7 +99,7 @@ def init_db(
         print("Uploading data...")
         for carbon in carbon_data:
             conn.execute(
-                "INSERT INTO carbon_data (datetime, grams_per_kw) VALUES (%s, %s)",
+                "INSERT INTO carbon_data (datetime, grams_per_kw) VALUES (%s, %s) ON CONFLICT DO NOTHING",
                 [carbon.utc_timestamp, carbon.grams_per_kw],
             )
 
@@ -157,7 +109,7 @@ def init_db(
         for location in locations:
             cur = conn.cursor()
             cur.execute(
-                "INSERT INTO locations (name) VALUES (%s) RETURNING id",
+                "INSERT INTO locations (name) VALUES (%s) RETURNING id ON CONFLICT DO NOTHING",
                 [location],
             )
             res = cur.fetchone()
@@ -167,15 +119,16 @@ def init_db(
 
         print("Locations uploaded")
 
-        for energy in energy_data:
-            conn.execute(
-                "INSERT INTO energy_usage (datetime, location_id, kw) VALUES (%s, %s, %s)",
-                [
-                    energy.utc_timestamp,
-                    loc_id_map[energy.location],
-                    energy.energy_usage,
-                ],
-            )
+        if len(loc_id_map) == len(locations):
+            for energy in energy_data:
+                conn.execute(
+                    "INSERT INTO energy_usage (datetime, location_id, kw) VALUES (%s, %s, %s) ON CONFLICT DO NOTHING",
+                    [
+                        energy.utc_timestamp,
+                        loc_id_map[energy.location],
+                        energy.energy_usage,
+                    ],
+                )
 
         print("Energy usage uploaded")
 
@@ -192,7 +145,7 @@ if __name__ == "__main__":
     carbon_df = pl.read_csv("data/Dados_Carbono_CSV.csv")
     energy_df = pl.read_csv("data/Dados_Janeiro_Horario_CSV.csv")
 
-    carbon_data, energy_data, locations = process_data(carbon_df, energy_df)
+    carbon_data, energy_data, locations = dc.process_data(carbon_df, energy_df)
 
     print("Data loaded. Uploading to database...")
 
