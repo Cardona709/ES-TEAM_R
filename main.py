@@ -55,7 +55,7 @@ if __name__ == "__main__":
             print("[MAIN] Scraping data...")
             carbon = get_carbon(URL)
             date = time.strftime("%Y-%m-%d %H:%M")
-
+            
             print(
                 "[MAIN] Carbon emmission",
                 carbon,
@@ -65,6 +65,7 @@ if __name__ == "__main__":
 
             carbon_data = db.CarbonData().set_attributes(date, carbon)
             carbon_data.insert_into_db(conn)
+            conn.commit()
 
             print("[MAIN] Data uploaded successfully")
             print("[MAIN] Sleeping for 1 hour...")

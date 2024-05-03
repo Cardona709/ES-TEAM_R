@@ -21,6 +21,7 @@ def GetCarbon(url_get_carbon):
     # creating soup object
     soup = BeautifulSoup(html, "html.parser")
     # print(soup.prettify())
+
     # finding an element by its class name
     element = soup.find_all(class_="select-none text-[1rem]")
     # parse the element to get the first word

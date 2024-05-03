@@ -54,16 +54,18 @@ class CarbonData:
 
     def insert_into_db(self, conn: pg.Connection):
         if self.utc_timestamp == "":
-            print("Error: UTC Timestamp is empty")
-            return
+            raise ValueError("timestamp is empty")
+        if self.grams_per_kw is None:
+            raise ValueError("grams_per_kw is None")
 
-        conn.execute(
+        res = conn.execute(
             """
                 INSERT INTO carbon_data (datetime, grams_per_kw)
                 VALUES (%s, %s)
                 """,
             [self.utc_timestamp, self.grams_per_kw],
         )
+
 
     def __repr__(self):
         return f"UTC Timestamp: {self.utc_timestamp}, Grams per KW: {self.grams_per_kw}"
