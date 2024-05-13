@@ -11,6 +11,8 @@ services:
 
   postgres:
     image: postgres:16-alpine
+    ports:
+      - 5432:5432 # Map container port 5050 to host port 80 (default pgAdmin port)
     environment:
       POSTGRES_PASSWORD: postgrespw # Replace with a strong password
       POSTGRES_USER: postgres

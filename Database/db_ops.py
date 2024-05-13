@@ -4,7 +4,7 @@ import time
 from typing import List
 
 import psycopg as pg
-from Database.data_classes import CarbonData, EnergyUsage, PostgresConfig
+from Database.data_classes import CarbonData, EnergyUsage, GasConsumption, PostgresConfig
 
 #### Database initialization ####
 
@@ -84,6 +84,7 @@ def upload_data(
     conn: pg.Connection,
     carbon_data: List[CarbonData],
     energy_data: List[EnergyUsage],
+    gas_data: List[GasConsumption],
     locations: List[str],
 ):
     try:
@@ -123,6 +124,20 @@ def upload_data(
                 ],
             )
         print("[DB] Energy usage uploaded")
+        
+        for gas in gas_data:
+            conn.execute(
+                """
+                    INSERT INTO gas_consumption (time, location_id, kw)
+                    VALUES (%s, %s, %s)
+                    """,
+                [
+                    gas.time,
+                    loc_id_map[gas.location],
+                    gas.gas_consumption,
+                ],
+            )
+        print("[DB] Gas consumption uploaded")
     except Exception as e:
         print(f"[DB] Data upload failed: {e}")
         conn.rollback()

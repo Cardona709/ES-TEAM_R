@@ -14,3 +14,10 @@ CREATE TABLE IF NOT EXISTS energy_usage (
   location_id BIGINT REFERENCES locations(id),
   kw REAL
 );
+
+CREATE TABLE IF NOT EXISTS gas_consumption (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  time TIME,
+  location_id BIGINT REFERENCES locations(id),
+  kw REAL
+);
