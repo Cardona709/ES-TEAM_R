@@ -86,21 +86,23 @@ class EnergyUsage:
         return f"UTC Timestamp: {self.utc_timestamp}, Location: {self.location}, Energy Usage (KW): {self.energy_usage}"
 
 class GasConsumption:
-    time: str
+    timestamp: str
     location: str
     gas_consumption: float
 
     #def init(self, location: str, time: str, gas_usage: float) -> Self:
-    def init(self, location:str, time: str, gas_consumption: float) -> Self:
+    def init(self, location:str, timestamp: str, gas_consumption: float) -> Self:
         self.location = location
-        self.time = time
+        self.timestamp = parse_datetime(timestamp)
         self.gas_consumption = gas_consumption
         return self
 
     def __repr__(self):
-        return f"Time: {self.time}, Location: {self.location}, Gas Consumption (KW): {self.gas_usage}"
+        return f"Timestamp: {self.timestamp}, Location: {self.location}, Gas Consumption (KW): {self.gas_usage}"
 
 def parse_datetime(datetime: str) -> str:
+    if datetime == "" or datetime is None:
+        return ""
     date, time = datetime.split(" ")
     day, month, year = date.split("/")
     return f"{year}-{month}-{day} {time}"
@@ -119,7 +121,6 @@ def process_data(
     locations_gas = gas_df.columns[2:]
     gas_data = [
         GasConsumption().init(location, row[0], row[idx + 2])
-        #GasConsumption().init(row[0], row[1])
         for row in gas_df.rows()
         for idx, location in enumerate(locations_gas)
     ]

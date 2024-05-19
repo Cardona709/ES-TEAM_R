@@ -36,9 +36,9 @@ if __name__ == "__main__":
     conn = db.connect(config)
 
     carbon_df = pl.read_csv("data/Dados_Carbono_CSV.csv")
-    energy_df = pl.read_csv("data/Dados_Janeiro_Horario_CSV.csv")
+    energy_df = pl.read_csv("data/Dados_energy_CSV.csv")
     gas_df = pl.read_csv("data/Dados_Gas_CSV.csv")
-
+    
     carbon_data, energy_data, gas_data, locations = process_data(carbon_df, energy_df, gas_df)
 
     # TODO: custom exception handling

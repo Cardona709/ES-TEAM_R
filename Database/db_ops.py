@@ -128,11 +128,11 @@ def upload_data(
         for gas in gas_data:
             conn.execute(
                 """
-                    INSERT INTO gas_consumption (time, location_id, kw)
+                    INSERT INTO gas_consumption (datetime, location_id, kw)
                     VALUES (%s, %s, %s)
                     """,
                 [
-                    gas.time,
+                    gas.timestamp,
                     loc_id_map[gas.location],
                     gas.gas_consumption,
                 ],
