@@ -43,7 +43,7 @@ class CarbonData:
     grams_per_kw: float = 0
 
     def set_attributes(self, utc_timestamp: str, grams_per_kw: float) -> Self:
-        self.utc_timestamp = utc_timestamp
+        self.utc_timestamp = parse_time(utc_timestamp)
         self.grams_per_kw = grams_per_kw
         return self
 
@@ -106,6 +106,13 @@ def parse_datetime(datetime: str) -> str:
     date, time = datetime.split(" ")
     day, month, year = date.split("/")
     return f"{year}-{month}-{day} {time}"
+
+def parse_time(datetime: str) -> str:
+    if datetime == "" or datetime is None:
+        return ""
+    date, time = datetime.split(" ")
+    hour, minute = time.split(":")
+    return f"{date} {hour}:{00}:{00}"
 
 
 def process_data(
