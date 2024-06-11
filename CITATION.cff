@@ -1,8 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 authors:
-- family-names: "ES Team R"
-  given-names: "2023-2024"
+- family-names: "ES Team R 2023-2024"
 title: "ES-TEAM_R"
 date-released: 2024-06-11
 url: "https://github.com/Cardona709/ES-TEAM_R"
