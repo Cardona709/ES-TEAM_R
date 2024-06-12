@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 3,
+  "id": 8,
   "links": [],
   "panels": [
     {
@@ -55,8 +55,8 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
-        "w": 8,
+        "h": 9,
+        "w": 18,
         "x": 0,
         "y": 0
       },
@@ -86,7 +86,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT (grams_per_kw * kw) AS carbon_footprint, energy_usage.datetime\r\nFROM energy_usage\r\nJOIN carbon_data ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations ON locations.id = energy_usage.location_id \r\nWHERE name = 'Electrotecnia (I)'\r\nAND energy_usage.datetime >= '2024-03-01 16:00'\r\nORDER BY energy_usage.datetime ASC\r\n\r\n\r\n",
+          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT ((carbon_data.grams_per_kw * gas_consumption.kw)+(carbon_data.grams_per_kw * energy_usage.kw)) AS carbon_footprint,\r\n\tenergy_usage.datetime\r\nFROM carbon_data \r\nJOIN gas_consumption ON carbon_data.datetime=gas_consumption.datetime\r\nJOIN energy_usage ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations AS l1 ON l1.id = gas_consumption.location_id\r\nJOIN locations AS l2 ON l2.id = energy_usage.location_id \r\nWHERE l1.name = '$Local' AND l2.name = '$Local' \r\nAND energy_usage.datetime >= '2024-03-01 16:00'\r\nORDER BY energy_usage.datetime ASC\r\n\r\n\r\n",
           "refId": "A",
           "sql": {
             "columns": [
@@ -107,23 +107,11 @@
           }
         }
       ],
-      "title": "DEEC Carbon Footprint ",
+      "title": "FEUP Carbon Footprint ",
+      "transparent": true,
       "type": "gauge"
     },
     {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 6
-      },
-      "id": 12,
-      "panels": [],
-      "title": "Last day",
-      "type": "row"
-    },
-    {
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "cdl73p6boa5tsc"
@@ -191,9 +179,9 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 7
+        "y": 9
       },
-      "id": 13,
+      "id": 32,
       "options": {
         "legend": {
           "calcs": [],
@@ -201,9 +189,6 @@
           "placement": "bottom",
           "showLegend": false
         },
-        "timezone": [
-          ""
-        ],
         "tooltip": {
           "mode": "single",
           "sort": "none"
@@ -218,7 +203,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT DISTINCT carbon_data.grams_per_kw * energy_usage.kw AS carbon_footprint, energy_usage.datetime\r\nFROM energy_usage\r\nJOIN carbon_data ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations ON locations.id = energy_usage.location_id \r\nWHERE name = 'Electrotecnia (I)' \r\nORDER BY energy_usage.datetime DESC\r\nLIMIT 24 OFFSET 2",
+          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT ((carbon_data.grams_per_kw * gas_consumption.kw)+(carbon_data.grams_per_kw * energy_usage.kw)) AS carbon_footprint,\r\n\tenergy_usage.datetime\r\nFROM carbon_data \r\nJOIN gas_consumption ON carbon_data.datetime=gas_consumption.datetime\r\nJOIN energy_usage ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations AS l1 ON l1.id = gas_consumption.location_id\r\nJOIN locations AS l2 ON l2.id = energy_usage.location_id \r\nWHERE l1.name = '$Local' AND l2.name = '$Local' \r\nAND energy_usage.datetime >= CURRENT_DATE - INTERVAL '$IntervalDay' DAY;\r\n\r\n\r\n",
           "refId": "A",
           "sql": {
             "columns": [
@@ -239,6 +224,7 @@
           }
         }
       ],
+      "transparent": true,
       "type": "timeseries"
     },
     {
@@ -276,11 +262,11 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 3,
+        "w": 4,
         "x": 12,
-        "y": 7
+        "y": 9
       },
-      "id": 9,
+      "id": 18,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -307,7 +293,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT MAX(carbon_data.grams_per_kw * energy_usage.kw) AS carbon_footprint\r\nFROM energy_usage\r\nJOIN carbon_data ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations ON locations.id = energy_usage.location_id \r\nWHERE name = 'Electrotecnia (I)' \r\nAND energy_usage.datetime < '2024-05-01'\r\nAND energy_usage.datetime >= '2024-04-30'\r\n",
+          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT MAX((carbon_data.grams_per_kw * gas_consumption.kw)+(carbon_data.grams_per_kw * energy_usage.kw)) AS carbon_footprint\r\nFROM carbon_data \r\nJOIN gas_consumption ON carbon_data.datetime=gas_consumption.datetime\r\nJOIN energy_usage ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations AS l1 ON l1.id = gas_consumption.location_id\r\nJOIN locations AS l2 ON l2.id = energy_usage.location_id \r\nWHERE l1.name = '$Local' AND l2.name = '$Local' \r\nAND energy_usage.datetime >= CURRENT_DATE - INTERVAL '$IntervalDay' DAY;\r\n\r\n\r\n\r\n",
           "refId": "A",
           "sql": {
             "columns": [
@@ -329,6 +315,7 @@
         }
       ],
       "title": "Maximum ",
+      "transparent": true,
       "type": "stat"
     },
     {
@@ -366,11 +353,11 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 3,
-        "x": 15,
-        "y": 7
+        "w": 4,
+        "x": 16,
+        "y": 9
       },
-      "id": 15,
+      "id": 34,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -397,7 +384,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT MiN(carbon_data.grams_per_kw * energy_usage.kw) AS carbon_footprint\r\nFROM energy_usage\r\nJOIN carbon_data ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations ON locations.id = energy_usage.location_id \r\nWHERE name = 'Electrotecnia (I)' \r\nAND energy_usage.datetime < '2024-05-01'\r\nAND energy_usage.datetime >= '2024-04-30'\r\n",
+          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT MIN((carbon_data.grams_per_kw * gas_consumption.kw)+(carbon_data.grams_per_kw * energy_usage.kw)) AS carbon_footprint\r\nFROM carbon_data \r\nJOIN gas_consumption ON carbon_data.datetime=gas_consumption.datetime\r\nJOIN energy_usage ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations AS l1 ON l1.id = gas_consumption.location_id\r\nJOIN locations AS l2 ON l2.id = energy_usage.location_id \r\nWHERE l1.name = '$Local' AND l2.name = '$Local' \r\nAND energy_usage.datetime >= CURRENT_DATE - INTERVAL '$IntervalDay' DAY\r\nAND energy_usage.kw <> 0\r\n\r\n\r\n\r\n\r\n\r\n",
           "refId": "A",
           "sql": {
             "columns": [
@@ -419,6 +406,7 @@
         }
       ],
       "title": "Minmum",
+      "transparent": true,
       "type": "stat"
     },
     {
@@ -457,10 +445,10 @@
       "gridPos": {
         "h": 5,
         "w": 6,
-        "x": 12,
-        "y": 10
+        "x": 13,
+        "y": 12
       },
-      "id": 16,
+      "id": 35,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -487,7 +475,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT AVG(carbon_data.grams_per_kw * energy_usage.kw) AS carbon_footprint\r\nFROM energy_usage\r\nJOIN carbon_data ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations ON locations.id = energy_usage.location_id \r\nWHERE name = 'Electrotecnia (I)' \r\nAND energy_usage.datetime < '2024-05-01'\r\nAND energy_usage.datetime >= '2024-04-30'\r\n\r\n",
+          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT AVG((carbon_data.grams_per_kw * gas_consumption.kw)+(carbon_data.grams_per_kw * energy_usage.kw)) AS carbon_footprint\r\nFROM carbon_data \r\nJOIN gas_consumption ON carbon_data.datetime=gas_consumption.datetime\r\nJOIN energy_usage ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations AS l1 ON l1.id = gas_consumption.location_id\r\nJOIN locations AS l2 ON l2.id = energy_usage.location_id \r\nWHERE l1.name = '$Local' AND l2.name = '$Local' \r\nAND energy_usage.datetime >= CURRENT_DATE - INTERVAL '$IntervalDay' DAY;\r\n\r\n\r\n\r\n\r\n\r\n",
           "refId": "A",
           "sql": {
             "columns": [
@@ -509,819 +497,90 @@
         }
       ],
       "title": "Mean",
-      "type": "stat"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 15
-      },
-      "id": 7,
-      "panels": [],
-      "title": "Last week",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "cdl73p6boa5tsc"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "bars",
-            "fillOpacity": 20,
-            "gradientMode": "scheme",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 3,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 4000
-              },
-              {
-                "color": "red",
-                "value": 6000
-              }
-            ]
-          },
-          "unit": "massg"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 16
-      },
-      "id": 8,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "cdl73p6boa5tsc"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT DISTINCT carbon_data.grams_per_kw * energy_usage.kw AS carbon_footprint, energy_usage.datetime\r\nFROM energy_usage\r\nJOIN carbon_data ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations ON locations.id = energy_usage.location_id \r\nWHERE name = 'Electrotecnia (I)' AND \r\nenergy_usage.datetime >= '2024-03-01'\r\nORDER BY energy_usage.datetime DESC\r\nLIMIT 170",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "cdl73p6boa5tsc"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "blue",
-            "mode": "fixed"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 3000
-              },
-              {
-                "color": "red",
-                "value": 6000
-              }
-            ]
-          },
-          "unit": "gCO₂"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 12,
-        "y": 16
-      },
-      "id": 14,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "10.4.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "cdl73p6boa5tsc"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT MAX(carbon_data.grams_per_kw * energy_usage.kw) AS carbon_footprint\r\nFROM energy_usage\r\nJOIN carbon_data ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations ON locations.id = energy_usage.location_id \r\nWHERE name = 'Electrotecnia (I)' \r\nAND energy_usage.datetime < '2024-05-02'\r\nAND energy_usage.datetime >= '2024-04-24'\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Maximum ",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "cdl73p6boa5tsc"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "blue",
-            "mode": "fixed"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 3000
-              },
-              {
-                "color": "red",
-                "value": 6000
-              }
-            ]
-          },
-          "unit": "gCO₂"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 15,
-        "y": 16
-      },
-      "id": 5,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "10.4.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "cdl73p6boa5tsc"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT MiN(carbon_data.grams_per_kw * energy_usage.kw) AS carbon_footprint\r\nFROM energy_usage\r\nJOIN carbon_data ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations ON locations.id = energy_usage.location_id \r\nWHERE name = 'Electrotecnia (I)' \r\nAND energy_usage.datetime < '2024-05-02'\r\nAND energy_usage.datetime >= '2024-04-24'\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Minmum",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "cdl73p6boa5tsc"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "blue",
-            "mode": "fixed"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 3000
-              },
-              {
-                "color": "red",
-                "value": 6000
-              }
-            ]
-          },
-          "unit": "gCO₂"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 6,
-        "x": 12,
-        "y": 19
-      },
-      "id": 11,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "mean"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "10.4.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "cdl73p6boa5tsc"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT AVG(carbon_data.grams_per_kw * energy_usage.kw) AS carbon_footprint\r\nFROM energy_usage\r\nJOIN carbon_data ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations ON locations.id = energy_usage.location_id \r\nWHERE name = 'Electrotecnia (I)' \r\nAND energy_usage.datetime < '2024-05-02'\r\nAND energy_usage.datetime >= '2024-04-24'\r\n\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Mean",
-      "type": "stat"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 24
-      },
-      "id": 3,
-      "panels": [],
-      "title": "Last Month",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "cdl73p6boa5tsc"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "bars",
-            "fillOpacity": 20,
-            "gradientMode": "scheme",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 3,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 4000
-              },
-              {
-                "color": "red",
-                "value": 6000
-              }
-            ]
-          },
-          "unit": "massg"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 25
-      },
-      "id": 2,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "cdl73p6boa5tsc"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT carbon_data.grams_per_kw * energy_usage.kw AS carbon_footprint, energy_usage.datetime\r\nFROM energy_usage\r\nJOIN carbon_data ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations ON locations.id = energy_usage.location_id \r\nWHERE name = 'Electrotecnia (I)' AND \r\nenergy_usage.datetime >= '2024-03-01'\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "cdl73p6boa5tsc"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "blue",
-            "mode": "fixed"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 3000
-              },
-              {
-                "color": "red",
-                "value": 6000
-              }
-            ]
-          },
-          "unit": "gCO₂"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 12,
-        "y": 25
-      },
-      "id": 4,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "10.4.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "cdl73p6boa5tsc"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT MAX(carbon_data.grams_per_kw * energy_usage.kw) AS carbon_footprint\r\nFROM energy_usage\r\nJOIN carbon_data ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations ON locations.id = energy_usage.location_id \r\nWHERE name = 'Electrotecnia (I)' AND \r\nenergy_usage.datetime >= '2024-03-01'\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Maximum ",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "cdl73p6boa5tsc"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "blue",
-            "mode": "fixed"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 3000
-              },
-              {
-                "color": "red",
-                "value": 6000
-              }
-            ]
-          },
-          "unit": "gCO₂"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 15,
-        "y": 25
-      },
-      "id": 10,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "10.4.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "cdl73p6boa5tsc"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT MiN(carbon_data.grams_per_kw * energy_usage.kw) AS carbon_footprint\r\nFROM energy_usage\r\nJOIN carbon_data ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations ON locations.id = energy_usage.location_id \r\nWHERE name = 'Electrotecnia (I)' \r\nAND energy_usage.datetime >= '2024-03-01'\r\nAND energy_usage.kw <> 0\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Minmum",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "cdl73p6boa5tsc"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "blue",
-            "mode": "fixed"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 3000
-              },
-              {
-                "color": "red",
-                "value": 6000
-              }
-            ]
-          },
-          "unit": "gCO₂"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 6,
-        "x": 12,
-        "y": 28
-      },
-      "id": 6,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "mean"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "10.4.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "cdl73p6boa5tsc"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SET search_path TO carbono_feup;\r\n\r\nSELECT AVG(carbon_data.grams_per_kw * energy_usage.kw) AS carbon_footprint\r\nFROM energy_usage\r\nJOIN carbon_data ON carbon_data.datetime=energy_usage.datetime\r\nJOIN locations ON locations.id = energy_usage.location_id \r\nWHERE name = 'Electrotecnia (I)' \r\nAND energy_usage.datetime >= '2024-03-01'\r\n\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Mean",
+      "transparent": true,
       "type": "stat"
     }
   ],
-  "refresh": "30m",
+  "refresh": "",
   "schemaVersion": 39,
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": "Electrotecnia (I)",
+          "value": "Electrotecnia (I)"
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "cdl73p6boa5tsc"
+        },
+        "definition": "SET search_path TO carbono_feup;\n\nSELECT locations.name FROM gas_consumption \nJOIN locations ON gas_consumption.location_id = locations.id \nGROUP BY locations.name",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "Local",
+        "options": [],
+        "query": "SET search_path TO carbono_feup;\n\nSELECT locations.name FROM gas_consumption \nJOIN locations ON gas_consumption.location_id = locations.id \nGROUP BY locations.name",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "30",
+          "value": "30"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "IntervalDay",
+        "options": [
+          {
+            "selected": false,
+            "text": "1",
+            "value": "1"
+          },
+          {
+            "selected": false,
+            "text": "7",
+            "value": "7"
+          },
+          {
+            "selected": true,
+            "text": "30",
+            "value": "30"
+          },
+          {
+            "selected": false,
+            "text": "60",
+            "value": "60"
+          },
+          {
+            "selected": false,
+            "text": "90",
+            "value": "90"
+          }
+        ],
+        "query": "1,7,30,60,90",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
   },
   "time": {
-    "from": "now-6h",
-    "to": "now"
+    "from": "2024-05-13T00:00:00.000Z",
+    "to": "2024-06-12T11:00:00.000Z"
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "DEEC Carbon Footprint",
-  "uid": "admhfd2tgra4gb",
-  "version": 30,
+  "title": "DEEC Carbon Footprint Copy",
+  "uid": "bdo70t9thai9sb",
+  "version": 19,
   "weekStart": ""
 }
